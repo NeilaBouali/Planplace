@@ -1,0 +1,13 @@
+PlanPlace mobile — version PWA de démonstration
+
+1. Pour un essai immédiat sur ordinateur : ouvrez index.html dans un navigateur.
+2. Pour l'installer sur un téléphone : publiez le contenu de ce dossier sur un hébergement HTTPS (par exemple Netlify ou GitHub Pages).
+3. Ouvrez ensuite l'URL HTTPS sur votre téléphone.
+   - iPhone (Safari) : Partager > Sur l'écran d'accueil > Ajouter.
+   - Android (Chrome) : menu ⋮ > Installer l'application ou Ajouter à l'écran d'accueil.
+
+Toutes les fonctionnalités fonctionnent en local : présences, télétravail, absences, plans et réservations, équipe et export CSV.
+Il n'y a pas encore de connexion multi-utilisateur, de base de données partagée, de comptes ni de synchronisation Teams/Outlook.
+Le plan et les 18 noms sont des exemples, modifiables dans Paramètres.
+
+L'interface emprunte les principes visuels Fluent/Microsoft Places sans affiliation ni utilisation de marque officielle.
