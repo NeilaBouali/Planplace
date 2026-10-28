@@ -1,4 +1,4 @@
-// PlanPlace 2.0 : le navigateur ne détient jamais de mots de passe ni de clés privées.
+// SeatPlace 2.0 : le navigateur ne détient jamais de mots de passe ni de clés privées.
 // Les réservations et les présences sont protégées par l'authentification Supabase + RLS.
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -9,13 +9,11 @@ const SEATS = [
   { id: 'D', x: 300, y: 442, w: 102, h: 92 },
   { id: 'E', x: 486, y: 145, w: 102, h: 104 },
   { id: 'F', x: 606, y: 145, w: 102, h: 104 },
-  // Un seul poste annexe, non nommé I ou J, accolé au module E/F.
   { id: 'EF_PLUS', label: 'E/F +', x: 496, y: 297, w: 200, h: 66 },
-  // Selon le plan Draw.io fourni : îlot H/K tourné à 90° sur la droite,
-  // îlot L/G également tourné, plus bas et rapproché du centre.
-  // Les libellés restent lisibles à l'horizontale pour l'application mobile.
-  { id: 'H', x: 827, y: 240, w: 87, h: 150 },
-  { id: 'K', x: 927, y: 240, w: 87, h: 150 },
+  // Position corrigée d'après le croquis fourni : H en haut, K en bas.
+  { id: 'H', x: 830, y: 235, w: 180, h: 76 },
+  { id: 'K', x: 830, y: 324, w: 180, h: 76 },
+  // L et G sont deux bureaux allongés, côte à côte, en bas au centre-droit.
   { id: 'L', x: 610, y: 435, w: 88, h: 144 },
   { id: 'G', x: 714, y: 435, w: 88, h: 144 }
 ];
@@ -40,6 +38,20 @@ function escapeHtml(s){return String(s??'').replace(/[&<>"']/g, x=>({'&':'&amp;'
 function initials(s){return (s||'PP').split(/[\s.@_-]+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
 function showScreen(name){for(const name2 of ['loading','loginScreen','pendingScreen','appScreen']){$('#'+name2).hidden=name2!==name;}}
 function toast(msg){$('#toast').textContent=msg;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),3500);}
+let planeFlightTimer = null, lastFlightAt = 0;
+function launchPlane(){
+  const el=$('#flightOverlay');
+  if(!el)return;
+  if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
+  const now=Date.now();
+  if(now-lastFlightAt<1600)return;
+  lastFlightAt=now;
+  el.classList.remove('flying');
+  void el.offsetWidth;
+  el.classList.add('flying');
+  clearTimeout(planeFlightTimer);
+  planeFlightTimer=setTimeout(()=>el.classList.remove('flying'),2900);
+}
 function showError(msg){const el=$('#appError');el.hidden=!msg;el.textContent=msg||'';}
 function statFor(id){return weekRows.find(x=>x.user_id===id && x.work_date===fmtDate(day))||null;}
 function seatOwner(id){return weekRows.find(x=>x.work_date===fmtDate(day)&&x.mode==='office'&&x.seat_id===id) || null;}
@@ -87,7 +99,7 @@ async function boot(){initUi();if(!cfgOk){showScreen('loginScreen');$('#setupNot
    const {data:{user},error}=await sb.auth.getUser();
    if(error || !user){showScreen('loginScreen');return;}
    await enterApp(user);
- } catch(err){showScreen('loginScreen');$('#loginError').textContent='Connexion au service impossible. Vérifiez votre connexion Internet et config.js.';console.error('PlanPlace initialization failed:',err);}
+ } catch(err){showScreen('loginScreen');$('#loginError').textContent='Connexion au service impossible. Vérifiez votre connexion Internet et config.js.';console.error('SeatPlace initialization failed:',err);}
  if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 async function signIn(e){e.preventDefault();if(!sb)return;const email=$('#email').value.trim(),password=$('#password').value;
@@ -105,10 +117,10 @@ async function enterApp(user){
  $('#userInitials').textContent=initials(personById(me.id)?.display_name||me.email);
  showScreen('appScreen');goto('home');await loadWeek();
  if(realtimeChannel)await sb.removeChannel(realtimeChannel);
- realtimeChannel=sb.channel('planplace-days').on('postgres_changes',{event:'*',schema:'public',table:'work_days'},()=>{loadWeek(false);if(view==='calendar')loadMonth(false);}).subscribe();
+ realtimeChannel=sb.channel('planplace-days').on('postgres_changes',{event:'*',schema:'public',table:'work_days'},(payload)=>{if((payload.eventType==='INSERT'||payload.eventType==='UPDATE')&&payload.new?.mode==='office')launchPlane();loadWeek(false);if(view==='calendar')loadMonth(false);}).subscribe();
 }
 async function logOut(){if(sb){if(realtimeChannel){await sb.removeChannel(realtimeChannel);realtimeChannel=null;}await sb.auth.signOut();}me=null;team=[];weekRows=[];monthRows=[];showScreen('loginScreen');toast('Vous êtes déconnecté.');}
-function goto(name){view=name;for(const el of $$('.view'))el.classList.toggle('active',el.id===name+'View');$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$('#weekHeading').hidden=name==='calendar';$('#weekButtons').hidden=name==='calendar';const title={home:['MON ESPACE DE TRAVAIL','Bonjour 👋','Organisons votre semaine au bureau.'],map:['PLAN DE L’OPEN SPACE','Choisir un bureau','Retrouvez la disposition réelle des postes de votre équipe.'],calendar:['VUE MOIS','Calendrier des présences','Visualisez tout le mois et choisissez une date pour réserver.'],team:['PRÉSENCES','Mon équipe','Qui vient au bureau et qui est en télétravail ?']}[name];if(title){$('#pageEyebrow').textContent=title[0];$('#pageTitle').textContent=title[1];$('#pageSubtitle').textContent=title[2];}renderAll();if(name==='calendar')loadMonth(false);}
+function goto(name){view=name;for(const el of $$('.view'))el.classList.toggle('active',el.id===name+'View');$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$('#weekHeading').hidden=name==='calendar';$('#weekButtons').hidden=name==='calendar';const title={home:['MON ESPACE DE TRAVAIL','Bonjour 👋','Organisons votre semaine au bureau.'],map:['RÉSERVATION DES BUREAUX','Choisir un siège','Retrouvez la disposition réelle des places de votre équipe.'],calendar:['VUE MOIS','Calendrier des présences','Visualisez tout le mois et choisissez une date pour réserver.'],team:['PRÉSENCES','Mon équipe','Qui vient au bureau et qui est en télétravail ?']}[name];if(title){$('#pageEyebrow').textContent=title[0];$('#pageTitle').textContent=title[1];$('#pageSubtitle').textContent=title[2];}renderAll();if(name==='calendar')loadMonth(false);}
 async function shiftWeek(n){day=addDays(day,n);await loadWeek();}
 async function shiftMonth(n){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+n,1,12);await loadMonth();}
 async function loadMonth(){if(!me)return;const callId=++monthRequest,{start,end}=monthStartEnd();const {data,error}=await sb.from('work_days').select('user_id,work_date,mode,seat_id').gte('work_date',start).lte('work_date',end);
@@ -165,6 +177,6 @@ async function updateStatus(mode,seatId=null){if(!me||busy)return;busy=true;try{
  let result;
  if(!mode){result=await sb.from('work_days').delete().eq('user_id',me.id).eq('work_date',fmtDate(day));}
  else {result=await sb.from('work_days').upsert({user_id:me.id,work_date:fmtDate(day),mode,seat_id:mode==='office'?seatId:null},{onConflict:'user_id,work_date'});}
- if(result.error)throw result.error;await loadWeek(false);if(view==='calendar')await loadMonth();toast(mode==='office'?'Bureau réservé !':mode==='remote'?'Télétravail enregistré.':mode==='absent'?'Absence enregistrée.':'Réservation libérée.');
+ if(result.error)throw result.error;await loadWeek(false);if(view==='calendar')await loadMonth();if(mode==='office')launchPlane();toast(mode==='office'?'Siège réservé ! Bon vol ✈':mode==='remote'?'Télétravail enregistré.':mode==='absent'?'Absence enregistrée.':'Réservation libérée.');
  }catch(err){console.error(err);if(err.code==='23505'){toast('Ce bureau vient d’être réservé. Choisissez une autre place.');await loadWeek(false);if(view==='calendar')await loadMonth();}else toast('Enregistrement impossible. Vérifiez votre connexion et vos droits.');}finally{busy=false;}}
 boot();

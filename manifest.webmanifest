@@ -1,14 +1,26 @@
 {
-  "name": "PlanPlace — Bureau partagé",
-  "short_name": "PlanPlace",
-  "description": "Planifiez vos jours de présence et réservez votre place au bureau.",
-  "start_url": "./",
+  "name": "SeatPlace · Réservation des sièges",
+  "short_name": "SeatPlace",
+  "description": "Réservez votre siège au bureau et suivez les présences en équipe.",
+  "id": "./index.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f8f9fd",
-  "theme_color": "#6759d8",
+  "background_color": "#f7f9ff",
+  "theme_color": "#6258cf",
+  "lang": "fr",
   "icons": [
-    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

@@ -3,26 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#6759d8">
-  <meta name="description" content="PlanPlace : planning de présence et réservation sécurisée de bureaux.">
+  <meta name="theme-color" content="#6258cf">
+  <meta name="description" content="SeatPlace : planning de présence et réservation sécurisée de bureaux.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=3">
-  <title>PlanPlace · Open space</title>
+  <link rel="stylesheet" href="./styles.css?v=4">
+  <title>SeatPlace · Open space</title>
 </head>
 <body>
   <div id="loading" class="full-screen loading-screen">
-    <div class="brand-icon">▦</div><h1>PlanPlace</h1><p>Chargement sécurisé…</p>
+    <span class="brand-icon"><img src="./seatmark.svg" alt=""></span><h1>SeatPlace</h1><p>Chargement sécurisé…</p>
   </div>
 
   <main id="loginScreen" class="login-screen" hidden>
     <div class="login-decoration one"></div><div class="login-decoration two"></div>
     <div class="login-card">
-      <div class="brand brand-center"><span class="brand-icon">▦</span><span><strong>PlanPlace</strong><small>Votre espace de travail partagé</small></span></div>
-      <div class="login-intro"><span class="eyebrow">ESPACE COLLABORATEURS</span><h1>Bienvenue 👋</h1><p>Connectez-vous pour consulter les présences et réserver une place au bureau.</p></div>
-      <div id="setupNotice" class="notice" hidden><strong>Configuration nécessaire</strong><p>Il faut d'abord connecter PlanPlace à Supabase en complétant le fichier <code>config.js</code>. Les réservations restent fermées tant que l'accès sécurisé n'est pas configuré.</p></div>
+      <div class="brand brand-center"><span class="brand-icon"><img src="./seatmark.svg" alt=""></span><span><strong>SeatPlace</strong><small>Votre place, côté aviation</small></span></div>
+      <div class="login-intro"><span class="eyebrow">ESPACE COLLABORATEURS</span><h1>Bienvenue à bord 👋</h1><p>Connectez-vous pour consulter les présences et réserver une place au bureau.</p></div>
+      <div id="setupNotice" class="notice" hidden><strong>Configuration nécessaire</strong><p>Il faut d'abord connecter SeatPlace à Supabase en complétant le fichier <code>config.js</code>. Les réservations restent fermées tant que l'accès sécurisé n'est pas configuré.</p></div>
       <form id="loginForm" class="login-form">
         <label for="email">Identifiant (adresse e-mail)</label>
         <input id="email" type="email" required autocomplete="username" placeholder="prenom@entreprise.fr" autocapitalize="none" spellcheck="false">
@@ -36,23 +36,23 @@
   </main>
 
   <div id="pendingScreen" class="login-screen" hidden>
-    <div class="login-card pending-card"><div class="brand-icon">🔒</div><h1>Compte en attente d'autorisation</h1><p>Votre connexion est valide, mais votre accès à PlanPlace n'a pas encore été approuvé. Demandez à l'administrateur d'activer votre compte dans Supabase.</p><button id="pendingLogout" class="btn btn-secondary wide">Se déconnecter</button></div>
+    <div class="login-card pending-card"><div class="brand-icon">🔒</div><h1>Compte en attente d'autorisation</h1><p>Votre connexion est valide, mais votre accès à SeatPlace n'a pas encore été approuvé. Demandez à l'administrateur d'activer votre compte dans Supabase.</p><button id="pendingLogout" class="btn btn-secondary wide">Se déconnecter</button></div>
   </div>
 
   <div id="appScreen" class="app-shell" hidden>
     <aside class="sidebar">
-      <div class="brand"><span class="brand-icon">▦</span><span><strong>PlanPlace</strong><small>Le bureau, autrement</small></span></div>
+      <div class="brand"><span class="brand-icon"><img src="./seatmark.svg" alt=""></span><span><strong>SeatPlace</strong><small>Le siège, autrement</small></span></div>
       <span class="menu-caption">MON ESPACE</span>
       <nav class="nav-list" aria-label="Menu principal">
         <button class="nav-item active" data-view="home"><span>⌂</span> Vue d'ensemble</button>
-        <button class="nav-item" data-view="map"><span>▦</span> Plan des bureaux</button>
+        <button class="nav-item" data-view="map"><span>▦</span> Réservation des bureaux</button>
         <button class="nav-item" data-view="calendar"><span>▤</span> Calendrier mensuel</button>
         <button class="nav-item" data-view="team"><span>♧</span> Mon équipe</button>
       </nav>
-      <div class="sidebar-footer"><div class="side-info">✦ <strong>Un bureau pour chacun</strong><small>Anticipez votre journée et retrouvez votre équipe.</small></div><button id="logoutDesktop" class="btn btn-link">↪ Se déconnecter</button></div>
+      <div class="sidebar-footer"><div class="side-info">✦ <strong>Chaque siège compte</strong><small>Trouvez votre place et embarquez avec votre équipe.</small></div><button id="logoutDesktop" class="btn btn-link">↪ Se déconnecter</button></div>
     </aside>
     <div class="main-pane">
-      <header class="topbar"><div class="mobile-brand"><span class="brand-icon">▦</span><strong>PlanPlace</strong></div><span class="topbar-subtitle">Mon open space</span><div class="user-badge"><span class="user-avatar" id="userInitials">PP</span><span><strong id="userName">Collaborateur</strong><small>Connecté</small></span><button id="logoutMobile" class="icon-button" title="Se déconnecter" aria-label="Se déconnecter">↪</button></div></header>
+      <header class="topbar"><div class="mobile-brand"><span class="brand-icon"><img src="./seatmark.svg" alt=""></span><strong>SeatPlace</strong></div><span class="topbar-subtitle">Mon espace · Seat Edition</span><div class="user-badge"><span class="user-avatar" id="userInitials">PP</span><span><strong id="userName">Collaborateur</strong><small>Connecté</small></span><button id="logoutMobile" class="icon-button" title="Se déconnecter" aria-label="Se déconnecter">↪</button></div></header>
       <main class="main-content">
         <div class="page-header"><div><div class="eyebrow" id="pageEyebrow">MON ESPACE DE TRAVAIL</div><h1 id="pageTitle">Bonjour 👋</h1><p id="pageSubtitle">Organisons votre semaine au bureau.</p></div><span class="pill">● Équipe connectée</span></div>
         <div class="week-heading" id="weekHeading"><strong id="weekLabel">Cette semaine</strong><div class="date-nav"><button id="prevWeek" aria-label="Semaine précédente">‹</button><button id="today" class="today-btn">Aujourd'hui</button><button id="nextWeek" aria-label="Semaine suivante">›</button></div></div>
@@ -60,14 +60,14 @@
         <div id="appError" class="notice error-notice" role="alert" hidden></div>
 
         <section id="homeView" class="view active">
-          <div class="hero"><div class="hero-kicker">✦ MON PLANNING HYBRIDE</div><h2>Où travaillerez-vous aujourd'hui ?</h2><p>Réservez votre poste ou indiquez votre journée de télétravail en quelques secondes.</p><div class="hero-actions"><button class="btn btn-white" data-go="map">Choisir une place →</button><button class="btn btn-translucent" id="heroRemote">Je suis en télétravail</button></div><div class="hero-orbit"></div></div>
+          <div class="hero"><div class="hero-kicker">✦ MON PLANNING HYBRIDE</div><h2>Prêt pour votre prochaine escale ?</h2><p>Réservez votre siège au bureau ou indiquez votre journée de télétravail.</p><div class="hero-actions"><button class="btn btn-white" data-go="map">Choisir une place →</button><button class="btn btn-translucent" id="heroRemote">Je suis en télétravail</button></div><div class="hero-orbit"></div><div class="hero-seat-art" aria-hidden="true"><img src="./seatmark.svg" alt=""><span>SEAT EXPERIENCE</span></div></div>
           <div id="metrics" class="metrics"></div>
           <div class="two-col"><div class="card section-card"><div class="section-top"><h2>Mon statut du jour</h2><span id="todayDateText" class="muted"></span></div><div id="myStatusBox" class="my-status"></div><div class="status-actions"><button class="btn btn-outline" data-go="map">⌑ Au bureau</button><button class="btn btn-outline" id="statusRemote">⌂ Télétravail</button><button class="btn btn-outline" id="statusAbsent">☷ Absence</button></div></div><div class="card section-card"><div class="section-top"><h2>Votre équipe aujourd'hui</h2><button data-go="team" class="text-button">Voir tous →</button></div><div id="teamPreview" class="team-preview"></div></div></div>
         </section>
 
         <section id="mapView" class="view">
-          <div class="map-layout"><div class="card map-card"><div class="map-header"><div><h2>Plan interactif de l’open space</h2><p>Disposition d'après votre vrai plan · appuyez sur une place pour la réserver</p></div><span id="mapSeatsCounter" class="pill"></span></div>
-              <div class="plan-scroll"><div class="plan-wrap"><svg id="officePlan" viewBox="0 0 1060 640" role="img" aria-labelledby="mapTitle mapDesc" xmlns="http://www.w3.org/2000/svg"><title id="mapTitle">Plan de l’open space</title><desc id="mapDesc">Postes A et B en haut à gauche, C et D en bas à gauche, E et F au centre avec leur annexe, Les postes H et K forment un îlot tourné à 90 degrés, placé sur la droite. Les postes L et G forment un second îlot tourné à 90 degrés, plus bas et plus près du centre, selon le plan fourni. Sélectionnez un bureau disponible.</desc>
+          <div class="map-layout"><div class="card map-card"><div class="map-header"><div><h2>Plan de réservation des sièges</h2><p>Disposition d'après votre vrai plan · appuyez sur une place pour la réserver</p></div><span id="mapSeatsCounter" class="pill"></span></div>
+              <div class="plan-scroll"><div class="plan-wrap"><svg id="officePlan" viewBox="0 0 1060 640" role="img" aria-labelledby="mapTitle mapDesc" xmlns="http://www.w3.org/2000/svg"><title id="mapTitle">Plan de l’open space</title><desc id="mapDesc">A et B en haut à gauche, C et D en bas à gauche. E et F au centre avec une annexe juste dessous. H au-dessus de K à droite, dans un îlot vertical de deux bureaux horizontaux. L et G en bas au centre-droit, deux bureaux étroits disposés côte à côte. Onze postes au total.</desc>
                 <rect x="14" y="20" width="1032" height="600" rx="16" fill="#fafbff" stroke="#dfe4f3" stroke-width="3"/>
                 <path d="M48 26H990" stroke="#bcd4e7" stroke-width="13" stroke-dasharray="125 13"/>
                 <path d="M24 82V540 M1040 83V552 M66 618H439 M563 618H1006" stroke="#9bd5e3" stroke-width="7" fill="none"/>
@@ -76,13 +76,13 @@
                 <g font-family="system-ui,sans-serif" fill="#a6adc4" font-size="17"><text x="106" y="326" text-anchor="middle" transform="rotate(-90 106 326)">TABLEAU</text><text x="965" y="110" font-size="11" text-anchor="middle">ÉQUIPEMENT</text><text x="528" y="604" font-size="12" text-anchor="middle" letter-spacing="4">CIRCULATION</text><text x="527" y="54" font-size="12" text-anchor="middle" letter-spacing="3">FENÊTRES</text></g>
                 <!-- Plateaux de travail (dont le module complémentaire collé à E et F) -->
                 <g fill="#eae8fb" stroke="#d7d1f7" stroke-width="2"><rect x="160" y="142" width="242" height="132" rx="13"/><rect x="170" y="426" width="241" height="136" rx="13"/><rect x="477" y="124" width="239" height="162" rx="13"/><rect x="477" y="283" width="239" height="94" rx="10"/><rect x="819" y="223" width="202" height="184" rx="13"/><rect x="600" y="419" width="211" height="176" rx="13"/></g>
-                <g stroke="#d3cef0" stroke-width="2"><path d="M281 144v128 M290 427v133 M596 126v157 M596 285v89 M922 224v181 M706 421v172"/></g>
-                <g fill="#fff" stroke="#bfc2df" stroke-width="2"><rect x="252" y="130" width="50" height="17" rx="4"/><rect x="246" y="562" width="50" height="15" rx="4"/><rect x="578" y="108" width="45" height="16" rx="4"/><rect x="578" y="375" width="45" height="16" rx="4"/><rect x="892" y="408" width="52" height="15" rx="4"/><rect x="674" y="595" width="52" height="15" rx="4"/><rect x="1025" y="330" width="11" height="42" rx="4"/></g>
+                <g stroke="#d3cef0" stroke-width="2"><path d="M281 144v128 M290 427v133 M596 126v157 M596 285v89 M820 315h200 M706 421v172"/></g>
+                <g fill="#fff" stroke="#bfc2df" stroke-width="2"><rect x="252" y="130" width="50" height="17" rx="4"/><rect x="246" y="562" width="50" height="15" rx="4"/><rect x="578" y="108" width="45" height="16" rx="4"/><rect x="578" y="375" width="45" height="16" rx="4"/><rect x="1032" y="282" width="11" height="39" rx="4"/><rect x="1032" y="337" width="11" height="39" rx="4"/><rect x="674" y="595" width="52" height="15" rx="4"/><rect x="1025" y="330" width="11" height="42" rx="4"/></g>
                 <g id="planSeats"></g>
               </svg></div></div>
               <div class="map-legend"><span><i class="legend-dot free"></i>Libre</span><span><i class="legend-dot taken"></i>Occupé</span><span><i class="legend-dot mine"></i>Ma place</span></div>
               <div class="seat-picker"><div class="seat-picker-title">Sélection rapide d’une place <small>Utile sur téléphone</small></div><div id="seatQuickList" class="seat-quick-list" aria-label="Choisir un bureau"></div></div>
-          </div><aside class="card booking-panel"><div class="section-top"><h2>Votre réservation</h2></div><p id="bookingDate" class="muted"></p><div class="booking-illustration">⌑</div><h3 id="bookingTitle">Choisissez une place</h3><p id="bookingDescription">Cliquez sur un bureau libre sur le plan.</p><button id="releaseSeat" class="btn btn-danger wide" hidden>Libérer mon bureau</button><div class="panel-note">🔐 Chaque compte réserve uniquement pour lui-même. Vos collègues voient les changements en direct.</div></aside></div>
+          </div><aside class="card booking-panel"><div class="section-top"><h2>Votre réservation</h2></div><p id="bookingDate" class="muted"></p><div class="booking-illustration"><svg class="seat-preview" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 105" aria-hidden="true"><defs><linearGradient id="cushion" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dedcff"/><stop offset="1" stop-color="#b9dbf6"/></linearGradient></defs><path d="M39 16q-8 1-7 13l8 42q2 8 12 8h26q7 0 8-8l2-34q1-12-10-13Z" fill="url(#cushion)" stroke="#7565c9" stroke-width="2.5"/><path d="M45 26q-4 1-4 7l6 30q1 5 5 5h26" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="4"/><path d="M40 77h52q10 0 10 9v2H55q-13 0-15-11" fill="#eceaff" stroke="#7565c9" stroke-width="2.5"/><path d="M31 62v25m73 0v11m-51-10v11" stroke="#7565c9" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M90 13l17-8-8 16-12 4" fill="#68badd"/></svg></div><h3 id="bookingTitle">Choisissez une place</h3><p id="bookingDescription">Cliquez sur un bureau libre sur le plan.</p><button id="releaseSeat" class="btn btn-danger wide" hidden>Libérer mon bureau</button><div class="panel-note">🔐 Chaque compte réserve uniquement pour lui-même. Vos collègues voient les changements en direct.</div></aside></div>
         </section>
 
         <section id="calendarView" class="view">
@@ -112,10 +112,11 @@
         <div class="bottom-space"></div>
       </main>
     </div>
-    <nav class="bottom-nav" aria-label="Navigation mobile"><button class="active" data-view="home"><span>⌂</span>Accueil</button><button data-view="map"><span>▦</span>Bureaux</button><button data-view="calendar"><span>▤</span>Mois</button><button data-view="team"><span>♧</span>Équipe</button></nav>
+    <nav class="bottom-nav" aria-label="Navigation mobile"><button class="active" data-view="home"><span>⌂</span>Accueil</button><button data-view="map"><span>▦</span>Réserver</button><button data-view="calendar"><span>▤</span>Mois</button><button data-view="team"><span>♧</span>Équipe</button></nav>
   </div>
+  <div id="flightOverlay" class="flight-overlay" aria-hidden="true"><div class="flight-trail"></div><svg class="flight-plane" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><defs><linearGradient id="planeBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a4e7ff"/><stop offset="1" stop-color="#6354d8"/></linearGradient></defs><path fill="url(#planeBody)" stroke="#fff" stroke-width="2" stroke-linejoin="round" d="M110 13c4-3 7 0 4 4L78 53 93 86l-7 8-36-28-22 20 2-19-18-18 18 3 21-22 28-37 8-7-8 40Z"/><path d="M33 72l-13 10" stroke="#b7edff" stroke-width="4" stroke-linecap="round"/></svg><div class="flight-clouds">✦ &nbsp; ✦ &nbsp; ✦</div></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./config.js"></script>
-  <script type="module" src="./app.js?v=32"></script>
+  <script type="module" src="./app.js?v=4"></script>
 </body>
 </html>
