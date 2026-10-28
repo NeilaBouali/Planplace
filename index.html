@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=3">
   <title>PlanPlace · Open space</title>
 </head>
 <body>
@@ -46,6 +46,7 @@
       <nav class="nav-list" aria-label="Menu principal">
         <button class="nav-item active" data-view="home"><span>⌂</span> Vue d'ensemble</button>
         <button class="nav-item" data-view="map"><span>▦</span> Plan des bureaux</button>
+        <button class="nav-item" data-view="calendar"><span>▤</span> Calendrier mensuel</button>
         <button class="nav-item" data-view="team"><span>♧</span> Mon équipe</button>
       </nav>
       <div class="sidebar-footer"><div class="side-info">✦ <strong>Un bureau pour chacun</strong><small>Anticipez votre journée et retrouvez votre équipe.</small></div><button id="logoutDesktop" class="btn btn-link">↪ Se déconnecter</button></div>
@@ -54,7 +55,7 @@
       <header class="topbar"><div class="mobile-brand"><span class="brand-icon">▦</span><strong>PlanPlace</strong></div><span class="topbar-subtitle">Mon open space</span><div class="user-badge"><span class="user-avatar" id="userInitials">PP</span><span><strong id="userName">Collaborateur</strong><small>Connecté</small></span><button id="logoutMobile" class="icon-button" title="Se déconnecter" aria-label="Se déconnecter">↪</button></div></header>
       <main class="main-content">
         <div class="page-header"><div><div class="eyebrow" id="pageEyebrow">MON ESPACE DE TRAVAIL</div><h1 id="pageTitle">Bonjour 👋</h1><p id="pageSubtitle">Organisons votre semaine au bureau.</p></div><span class="pill">● Équipe connectée</span></div>
-        <div class="week-heading"><strong id="weekLabel">Cette semaine</strong><div class="date-nav"><button id="prevWeek" aria-label="Semaine précédente">‹</button><button id="today" class="today-btn">Aujourd'hui</button><button id="nextWeek" aria-label="Semaine suivante">›</button></div></div>
+        <div class="week-heading" id="weekHeading"><strong id="weekLabel">Cette semaine</strong><div class="date-nav"><button id="prevWeek" aria-label="Semaine précédente">‹</button><button id="today" class="today-btn">Aujourd'hui</button><button id="nextWeek" aria-label="Semaine suivante">›</button></div></div>
         <div id="weekButtons" class="week-grid" aria-label="Choisir le jour"></div>
         <div id="appError" class="notice error-notice" role="alert" hidden></div>
 
@@ -66,7 +67,7 @@
 
         <section id="mapView" class="view">
           <div class="map-layout"><div class="card map-card"><div class="map-header"><div><h2>Plan interactif de l’open space</h2><p>Disposition d'après votre vrai plan · appuyez sur une place pour la réserver</p></div><span id="mapSeatsCounter" class="pill"></span></div>
-              <div class="plan-scroll"><div class="plan-wrap"><svg id="officePlan" viewBox="0 0 1060 640" role="img" aria-labelledby="mapTitle mapDesc" xmlns="http://www.w3.org/2000/svg"><title id="mapTitle">Plan de l’open space</title><desc id="mapDesc">Postes A et B en haut à gauche, C et D en bas à gauche, E et F au centre avec leur annexe, H et G à droite. Sélectionnez un bureau disponible.</desc>
+              <div class="plan-scroll"><div class="plan-wrap"><svg id="officePlan" viewBox="0 0 1060 640" role="img" aria-labelledby="mapTitle mapDesc" xmlns="http://www.w3.org/2000/svg"><title id="mapTitle">Plan de l’open space</title><desc id="mapDesc">Postes A et B en haut à gauche, C et D en bas à gauche, E et F au centre avec leur annexe, À droite, les postes K et L font face aux postes H et G, dans un ensemble de quatre postes. Sélectionnez un bureau disponible.</desc>
                 <rect x="14" y="20" width="1032" height="600" rx="16" fill="#fafbff" stroke="#dfe4f3" stroke-width="3"/>
                 <path d="M48 26H990" stroke="#bcd4e7" stroke-width="13" stroke-dasharray="125 13"/>
                 <path d="M24 82V540 M1040 83V552 M66 618H439 M563 618H1006" stroke="#9bd5e3" stroke-width="7" fill="none"/>
@@ -74,23 +75,47 @@
                 <g fill="#f0f1fa" stroke="#cdd2e6" stroke-width="2"><rect x="79" y="276" width="48" height="101" rx="7"/><rect x="930" y="89" width="48" height="48" rx="6"/><rect x="995" y="234" width="30" height="112" rx="6"/></g>
                 <g font-family="system-ui,sans-serif" fill="#a6adc4" font-size="17"><text x="106" y="326" text-anchor="middle" transform="rotate(-90 106 326)">TABLEAU</text><text x="965" y="110" font-size="11" text-anchor="middle">ÉQUIPEMENT</text><text x="528" y="604" font-size="12" text-anchor="middle" letter-spacing="4">CIRCULATION</text><text x="527" y="54" font-size="12" text-anchor="middle" letter-spacing="3">FENÊTRES</text></g>
                 <!-- Plateaux de travail (dont le module complémentaire collé à E et F) -->
-                <g fill="#eae8fb" stroke="#d7d1f7" stroke-width="2"><rect x="160" y="142" width="242" height="132" rx="13"/><rect x="170" y="426" width="241" height="136" rx="13"/><rect x="477" y="124" width="239" height="162" rx="13"/><rect x="477" y="283" width="239" height="94" rx="10"/><rect x="809" y="324" width="148" height="161" rx="13"/></g>
-                <g stroke="#d3cef0" stroke-width="2"><path d="M281 144v128 M290 427v133 M596 126v157 M596 285v89 M883 326v158"/></g>
-                <g fill="#fff" stroke="#bfc2df" stroke-width="2"><rect x="252" y="130" width="50" height="17" rx="4"/><rect x="246" y="562" width="50" height="15" rx="4"/><rect x="578" y="108" width="45" height="16" rx="4"/><rect x="578" y="375" width="45" height="16" rx="4"/><rect x="955" y="389" width="16" height="40" rx="4"/></g>
+                <g fill="#eae8fb" stroke="#d7d1f7" stroke-width="2"><rect x="160" y="142" width="242" height="132" rx="13"/><rect x="170" y="426" width="241" height="136" rx="13"/><rect x="477" y="124" width="239" height="162" rx="13"/><rect x="477" y="283" width="239" height="94" rx="10"/><rect x="758" y="324" width="265" height="161" rx="13"/></g>
+                <g stroke="#d3cef0" stroke-width="2"><path d="M281 144v128 M290 427v133 M596 126v157 M596 285v89 M890 326v158 M760 406h261"/></g>
+                <g fill="#fff" stroke="#bfc2df" stroke-width="2"><rect x="252" y="130" width="50" height="17" rx="4"/><rect x="246" y="562" width="50" height="15" rx="4"/><rect x="578" y="108" width="45" height="16" rx="4"/><rect x="578" y="375" width="45" height="16" rx="4"/><rect x="1025" y="382" width="11" height="42" rx="4"/></g>
                 <g id="planSeats"></g>
               </svg></div></div>
               <div class="map-legend"><span><i class="legend-dot free"></i>Libre</span><span><i class="legend-dot taken"></i>Occupé</span><span><i class="legend-dot mine"></i>Ma place</span></div>
+              <div class="seat-picker"><div class="seat-picker-title">Sélection rapide d’une place <small>Utile sur téléphone</small></div><div id="seatQuickList" class="seat-quick-list" aria-label="Choisir un bureau"></div></div>
           </div><aside class="card booking-panel"><div class="section-top"><h2>Votre réservation</h2></div><p id="bookingDate" class="muted"></p><div class="booking-illustration">⌑</div><h3 id="bookingTitle">Choisissez une place</h3><p id="bookingDescription">Cliquez sur un bureau libre sur le plan.</p><button id="releaseSeat" class="btn btn-danger wide" hidden>Libérer mon bureau</button><div class="panel-note">🔐 Chaque compte réserve uniquement pour lui-même. Vos collègues voient les changements en direct.</div></aside></div>
+        </section>
+
+        <section id="calendarView" class="view">
+          <div class="calendar-layout">
+            <div class="card month-card">
+              <div class="month-toolbar">
+                <div><div class="eyebrow">PLANNING DE L’ÉQUIPE</div><h2 id="monthHeading">Calendrier mensuel</h2><p>Présences, télétravail et disponibilités pour chaque journée.</p></div>
+                <div class="month-nav" aria-label="Navigation du calendrier"><button id="prevMonth" aria-label="Mois précédent">‹</button><button id="monthToday">Ce mois</button><button id="nextMonth" aria-label="Mois suivant">›</button></div>
+              </div>
+              <div class="month-weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+              <div id="monthGrid" class="month-grid" aria-label="Calendrier des présences"></div>
+              <div class="month-legend"><span><i class="legend-dot taken"></i>Au bureau</span><span><i class="legend-dot remote"></i>En télétravail</span><span><i class="legend-dot mine"></i>Ma journée renseignée</span></div>
+            </div>
+            <aside class="card month-side">
+              <div class="eyebrow">JOURNÉE SÉLECTIONNÉE</div><h2 id="monthSelectedDate">Aujourd’hui</h2>
+              <div id="monthDayStats" class="month-day-stats"></div>
+              <div class="month-my-status"><span class="eyebrow">MON STATUT</span><strong id="monthMyStatus">Non renseigné</strong></div>
+              <button id="calendarToMap" class="btn btn-primary wide">Voir le plan et réserver →</button>
+              <div class="month-quick-actions"><button id="calendarRemote" class="btn btn-outline">⌂ Télétravail</button><button id="calendarAbsent" class="btn btn-outline">☷ Absence</button></div>
+              <div class="month-team-title">Collègues présents <span id="monthOfficeCount"></span></div>
+              <div id="monthPeople" class="month-people"></div>
+            </aside>
+          </div>
         </section>
 
         <section id="teamView" class="view"><div class="card team-card"><div class="section-top"><div><h2>Présences de l’équipe</h2><p class="muted">Le planning du <span id="teamDate"></span></p></div><span id="teamCount" class="pill"></span></div><div class="filter-toolbar"><input id="teamSearch" type="search" placeholder="Rechercher un collègue…" aria-label="Rechercher un collègue"><select id="teamFilter" aria-label="Filtrer les présences"><option value="all">Tous les statuts</option><option value="office">Au bureau</option><option value="remote">Télétravail</option><option value="absent">Absents</option><option value="none">Non renseigné</option></select></div><div id="teamList" class="team-list"></div></div></section>
         <div class="bottom-space"></div>
       </main>
     </div>
-    <nav class="bottom-nav" aria-label="Navigation mobile"><button class="active" data-view="home"><span>⌂</span>Accueil</button><button data-view="map"><span>▦</span>Bureaux</button><button data-view="team"><span>♧</span>Équipe</button></nav>
+    <nav class="bottom-nav" aria-label="Navigation mobile"><button class="active" data-view="home"><span>⌂</span>Accueil</button><button data-view="map"><span>▦</span>Bureaux</button><button data-view="calendar"><span>▤</span>Mois</button><button data-view="team"><span>♧</span>Équipe</button></nav>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./config.js"></script>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=3"></script>
 </body>
 </html>
