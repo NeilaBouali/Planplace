@@ -1,0 +1,16 @@
+{
+  "name": "PlanPlace · Mon espace de travail",
+  "short_name": "PlanPlace",
+  "description": "Gérez le télétravail et la réservation des places au bureau.",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f9fc",
+  "theme_color": "#6b5cdd",
+  "lang": "fr",
+  "icons": [
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
