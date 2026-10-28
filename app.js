@@ -11,18 +11,24 @@ const SEATS = [
   { id: 'F', x: 606, y: 145, w: 102, h: 104 },
   // Un seul poste annexe, non nommé I ou J, accolé au module E/F.
   { id: 'EF_PLUS', label: 'E/F +', x: 496, y: 297, w: 200, h: 66 },
-  { id: 'H', x: 826, y: 338, w: 113, h: 65 },
-  { id: 'G', x: 826, y: 412, w: 113, h: 61 }
+  // Deux nouveaux postes face à H et G, en miroir (pas de poste I ni J).
+  { id: 'K', x: 769, y: 338, w: 113, h: 65 },
+  { id: 'L', x: 769, y: 412, w: 113, h: 61 },
+  { id: 'H', x: 899, y: 338, w: 113, h: 65 },
+  { id: 'G', x: 899, y: 412, w: 113, h: 61 }
 ];
 const CAPACITY = SEATS.length;
 const cfg = window.PLANPLACE_CONFIG ?? {};
 const cfgOk = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test((cfg.supabaseUrl || '').trim()) &&
   typeof cfg.supabaseKey === 'string' && cfg.supabaseKey.length > 20 && !cfg.supabaseKey.includes('VOTRE_');
-let sb = null, me = null, team = [], weekRows = [], day = todayOrMonday(), view = 'home', busy = false;
+let sb = null, me = null, team = [], weekRows = [], monthRows = [], day = todayOrMonday(), view = 'home', busy = false;
+let calendarMonth = new Date(day.getFullYear(), day.getMonth(), 1, 12), monthRequest = 0;
 let currentRequest = 0, toastTimer, realtimeChannel = null;
 const dayFormatter = new Intl.DateTimeFormat('fr-FR', {weekday:'long',day:'numeric',month:'long'});
 const monthFormatter = new Intl.DateTimeFormat('fr-FR', {day:'numeric',month:'long'});
 const dayNames = ['Lun','Mar','Mer','Jeu','Ven'];
+const fullDayFormatter = new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const fullMonthFormatter = new Intl.DateTimeFormat('fr-FR',{month:'long',year:'numeric'});
 function parseLocal(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d,12);}
 function fmtDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function addDays(d,n){const r=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12);r.setDate(r.getDate()+n);return r;}
@@ -40,6 +46,8 @@ function myStat(){return me?statFor(me.id):null;}
 function caption(st){return !st?'Non renseigné':st.mode==='office'?`Bureau ${st.seat_id==='EF_PLUS'?'Annexe E/F':st.seat_id}`:st.mode==='remote'?'Télétravail':'Absent(e)';}
 function modeText(st){return !st?'Non prévu':st.mode==='office'?'Au bureau':st.mode==='remote'?'En TT':'Absent(e)';}
 function metrics(){const rows=team.map(p=>statFor(p.id));return {office:rows.filter(x=>x?.mode==='office').length,remote:rows.filter(x=>x?.mode==='remote').length,absent:rows.filter(x=>x?.mode==='absent').length};}
+function monthStartEnd(){const start=monday(calendarMonth);return {start:fmtDate(start),end:fmtDate(addDays(start,41))};}
+function monthRowsFor(d){const key=fmtDate(d);return monthRows.filter(r=>r.work_date===key);}
 function weekStartEnd(){const start=monday(day);return {start:fmtDate(start),end:fmtDate(addDays(start,4))};}
 function initUi(){
  $('#togglePassword').addEventListener('click',()=>{const f=$('#password'),show=f.type==='password';f.type=show?'text':'password';$('#togglePassword').textContent=show?'Masquer':'Afficher';});
@@ -55,12 +63,20 @@ function initUi(){
  $('#statusRemote').addEventListener('click',()=>updateStatus('remote'));
  $('#statusAbsent').addEventListener('click',()=>updateStatus('absent'));
  $('#releaseSeat').addEventListener('click',()=>updateStatus(null));
+ $('#prevMonth').addEventListener('click',()=>shiftMonth(-1));
+ $('#nextMonth').addEventListener('click',()=>shiftMonth(1));
+ $('#monthToday').addEventListener('click',async()=>{day=todayOrMonday();calendarMonth=new Date(day.getFullYear(),day.getMonth(),1,12);await Promise.all([loadWeek(false),loadMonth()]);});
+ $('#calendarToMap').addEventListener('click',()=>goto('map'));
+ $('#calendarRemote').addEventListener('click',()=>updateStatus('remote'));
+ $('#calendarAbsent').addEventListener('click',()=>updateStatus('absent'));
+ $('#monthGrid').addEventListener('click',async(e)=>{const el=e.target.closest('[data-month-day]');if(!el)return;day=parseLocal(el.dataset.monthDay);if(day.getMonth()!==calendarMonth.getMonth()||day.getFullYear()!==calendarMonth.getFullYear()){calendarMonth=new Date(day.getFullYear(),day.getMonth(),1,12);await Promise.all([loadWeek(false),loadMonth()]);}else{renderCalendar();await loadWeek(false);}});
+ $('#seatQuickList').addEventListener('click',e=>{const b=e.target.closest('[data-quick-seat]');if(b&&!b.disabled)selectSeat(b.dataset.quickSeat);});
  $('#teamSearch').addEventListener('input',renderTeam);
  $('#teamFilter').addEventListener('change',renderTeam);
  $('#weekButtons').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(b){day=parseLocal(b.dataset.day);renderAll();}});
  $('#officePlan').addEventListener('click',e=>{const target=e.target.closest('[data-seat]');if(target)selectSeat(target.dataset.seat);});
  $('#officePlan').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const target=e.target.closest('[data-seat]');if(target){e.preventDefault();selectSeat(target.dataset.seat);}}});
- document.addEventListener('visibilitychange',()=>{if(!document.hidden && me)loadWeek(false);});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden && me){loadWeek(false);if(view==='calendar')loadMonth(false);}});
 }
 async function boot(){initUi();if(!cfgOk){showScreen('loginScreen');$('#setupNotice').hidden=false;$('#loginForm').hidden=true;return;}
  try{
@@ -87,23 +103,51 @@ async function enterApp(user){
  $('#userInitials').textContent=initials(personById(me.id)?.display_name||me.email);
  showScreen('appScreen');goto('home');await loadWeek();
  if(realtimeChannel)await sb.removeChannel(realtimeChannel);
- realtimeChannel=sb.channel('planplace-days').on('postgres_changes',{event:'*',schema:'public',table:'work_days'},()=>{loadWeek(false);}).subscribe();
+ realtimeChannel=sb.channel('planplace-days').on('postgres_changes',{event:'*',schema:'public',table:'work_days'},()=>{loadWeek(false);if(view==='calendar')loadMonth(false);}).subscribe();
 }
-async function logOut(){if(sb){if(realtimeChannel){await sb.removeChannel(realtimeChannel);realtimeChannel=null;}await sb.auth.signOut();}me=null;team=[];weekRows=[];showScreen('loginScreen');toast('Vous êtes déconnecté.');}
-function goto(name){view=name;for(const el of $$('.view'))el.classList.toggle('active',el.id===name+'View');$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));const title={home:['MON ESPACE DE TRAVAIL','Bonjour 👋','Organisons votre semaine au bureau.'],map:['PLAN DE L’OPEN SPACE','Choisir un bureau','Retrouvez la disposition réelle des postes de votre équipe.'],team:['PRÉSENCES','Mon équipe','Qui vient au bureau et qui est en télétravail ?']}[name];if(title){$('#pageEyebrow').textContent=title[0];$('#pageTitle').textContent=title[1];$('#pageSubtitle').textContent=title[2];}renderAll();}
+async function logOut(){if(sb){if(realtimeChannel){await sb.removeChannel(realtimeChannel);realtimeChannel=null;}await sb.auth.signOut();}me=null;team=[];weekRows=[];monthRows=[];showScreen('loginScreen');toast('Vous êtes déconnecté.');}
+function goto(name){view=name;for(const el of $$('.view'))el.classList.toggle('active',el.id===name+'View');$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$('#weekHeading').hidden=name==='calendar';$('#weekButtons').hidden=name==='calendar';const title={home:['MON ESPACE DE TRAVAIL','Bonjour 👋','Organisons votre semaine au bureau.'],map:['PLAN DE L’OPEN SPACE','Choisir un bureau','Retrouvez la disposition réelle des postes de votre équipe.'],calendar:['VUE MOIS','Calendrier des présences','Visualisez tout le mois et choisissez une date pour réserver.'],team:['PRÉSENCES','Mon équipe','Qui vient au bureau et qui est en télétravail ?']}[name];if(title){$('#pageEyebrow').textContent=title[0];$('#pageTitle').textContent=title[1];$('#pageSubtitle').textContent=title[2];}renderAll();if(name==='calendar')loadMonth(false);}
 async function shiftWeek(n){day=addDays(day,n);await loadWeek();}
+async function shiftMonth(n){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+n,1,12);await loadMonth();}
+async function loadMonth(){if(!me)return;const callId=++monthRequest,{start,end}=monthStartEnd();const {data,error}=await sb.from('work_days').select('user_id,work_date,mode,seat_id').gte('work_date',start).lte('work_date',end);
+ if(callId!==monthRequest)return;
+ if(error){showError('Impossible de charger le calendrier mensuel. Vérifiez votre connexion.');console.error(error);return;}
+ monthRows=data||[];showError('');renderCalendar();}
 async function loadWeek(notify=true){if(!me)return;const callId=++currentRequest;const {start,end}=weekStartEnd();const {data,error}=await sb.from('work_days').select('user_id,work_date,mode,seat_id').gte('work_date',start).lte('work_date',end);
  if(callId!==currentRequest)return;
  if(error){showError('Impossible de récupérer le planning. Vérifiez que le script SQL est exécuté et que votre compte est autorisé.');console.error(error);return;}
- weekRows=data||[];showError('');renderAll();if(notify===true && day.toDateString()!==todayOrMonday().toDateString()){} }
-function renderAll(){if(!me||!team.length)return;renderWeek();renderHome();renderMap();renderTeam();}
+ weekRows=data||[];showError('');renderAll(); }
+function renderAll(){if(!me||!team.length)return;renderWeek();renderHome();renderMap();renderTeam();renderCalendar();}
 function renderWeek(){const start=monday(day);const end=addDays(start,4);$('#weekLabel').textContent=`Semaine du ${monthFormatter.format(start)} au ${monthFormatter.format(end)}`;$('#weekButtons').innerHTML=dayNames.map((label,i)=>{const d=addDays(start,i);const selected=fmtDate(d)===fmtDate(day),count=weekRows.filter(r=>r.work_date===fmtDate(d)&&r.mode==='office').length;return `<button class="day ${selected?'active':''}" data-day="${fmtDate(d)}" aria-pressed="${selected}"><small>${label}</small><strong>${d.getDate()}</strong><i title="${count} présences"></i></button>`;}).join('');}
+function renderCalendar(){
+ if(!me||!team.length)return;
+ $('#monthHeading').textContent=fullMonthFormatter.format(calendarMonth).replace(/^./,c=>c.toUpperCase());
+ const start=monday(calendarMonth),last=addDays(start,41),todayKey=fmtDate(new Date());
+ const lookup=new Map();for(const r of monthRows){if(!lookup.has(r.work_date))lookup.set(r.work_date,[]);lookup.get(r.work_date).push(r);}
+ const days=[];
+ for(let i=0;i<42;i++){
+   const d=addDays(start,i),key=fmtDate(d),rows=lookup.get(key)||[];
+   const office=rows.filter(r=>r.mode==='office').length,remote=rows.filter(r=>r.mode==='remote').length;
+   const mine=rows.find(r=>r.user_id===me.id);const outside=d.getMonth()!==calendarMonth.getMonth();
+   const tag=mine?.mode==='office'?('Bureau '+(mine.seat_id==='EF_PLUS'?'E/F +':mine.seat_id)):mine?.mode==='remote'?'Mon TT':mine?.mode==='absent'?'Mon absence':'';
+   const label=`${fullDayFormatter.format(d)} : ${office} au bureau, ${remote} en télétravail${tag?', '+tag:''}`;
+   days.push(`<button type="button" class="month-day ${outside?'other-month':''} ${(i%7>=5)?'weekend':''} ${key===fmtDate(day)?'selected':''} ${key===todayKey?'is-today':''}" data-month-day="${key}" aria-pressed="${key===fmtDate(day)}" aria-label="${escapeHtml(label)}"><span class="month-date">${d.getDate()}</span><span class="month-numbers"><span class="month-count office">${office}<span class="month-count-label"> bureau</span></span><span class="month-count remote">${remote}<span class="month-count-label"> TT</span></span></span>${tag?`<span class="month-my-tag">${escapeHtml(tag)}</span>`:'<span class="month-empty-tag">&nbsp;</span>'}</button>`);
+ }
+ $('#monthGrid').innerHTML=days.join('');
+ const selected=lookup.get(fmtDate(day))||[],office=selected.filter(r=>r.mode==='office'),remote=selected.filter(r=>r.mode==='remote'),absent=selected.filter(r=>r.mode==='absent');
+ $('#monthSelectedDate').textContent=fullDayFormatter.format(day).replace(/^./,c=>c.toUpperCase());
+ $('#monthDayStats').innerHTML=`<div><strong>${office.length}<small>/${CAPACITY}</small></strong><span>Au bureau</span></div><div><strong>${remote.length}</strong><span>En TT</span></div><div><strong>${CAPACITY-office.length}</strong><span>Places libres</span></div>`;
+ const mine=selected.find(r=>r.user_id===me.id);$('#monthMyStatus').textContent=caption(mine);
+ $('#monthOfficeCount').textContent=`${office.length}`;
+ $('#monthPeople').innerHTML=office.length?office.map(r=>{const p=personById(r.user_id);return `<div><span class="mini-avatar">${escapeHtml(initials(p?.display_name||'?'))}</span><span>${escapeHtml(p?.display_name||'Collaborateur')}</span><b>${escapeHtml(r.seat_id==='EF_PLUS'?'E/F +':r.seat_id)}</b></div>`;}).join(''):'<p class="empty">Aucune réservation ce jour-là.</p>';
+}
 function renderHome(){const c=metrics();$('#metrics').innerHTML=`<div class="metric"><div><small>Au bureau</small><strong>${c.office}</strong></div><i>♧</i></div><div class="metric"><div><small>Places libres</small><strong>${CAPACITY-c.office}</strong></div><i>⌑</i></div><div class="metric"><div><small>En télétravail</small><strong>${c.remote}</strong></div><i>⌂</i></div>`;
  $('#todayDateText').textContent=monthFormatter.format(day);const st=myStat();$('#myStatusBox').innerHTML=`<span class="status-icon">${st?.mode==='office'?'⌑':st?.mode==='remote'?'⌂':st?.mode==='absent'?'☷':'○'}</span><span><strong>${escapeHtml(caption(st))}</strong><small>${st?.mode==='office'?'Votre réservation est confirmée':st?.mode==='remote'?'Vous travaillez à distance':st?.mode==='absent'?'Journée d’absence enregistrée':'Indiquez votre présence ou réservez une place'}</small></span>`;
  const listing=team.filter(p=>statFor(p.id)?.mode==='office').slice(0,4);$('#teamPreview').innerHTML=listing.length?listing.map(p=>personHtml(p)).join(''):`<div class="empty">Personne n'a encore réservé de place.</div>`;}
 function personHtml(p){const st=statFor(p.id);return `<div class="team-item"><span class="avatar">${escapeHtml(initials(p.display_name))}</span><span class="person-info"><span class="person-name">${escapeHtml(p.display_name)}${p.id===me.id?' · Vous':''}</span><span class="person-detail">${escapeHtml(caption(st))}</span></span><span class="tag ${st?.mode||''}">${escapeHtml(modeText(st))}</span></div>`;}
 function renderTeam(){if(!me)return;$('#teamDate').textContent=dayFormatter.format(day);$('#teamCount').textContent=`${team.length} personnes`;const q=$('#teamSearch').value.toLocaleLowerCase('fr').trim(),flt=$('#teamFilter').value;const filtered=team.filter(p=>p.display_name.toLocaleLowerCase('fr').includes(q) && (flt==='all'||(statFor(p.id)?.mode||'none')===flt));$('#teamList').innerHTML=filtered.length?filtered.map(personHtml).join(''):`<div class="empty">Aucun collaborateur correspondant.</div>`;}
 function renderMap(){if(!me)return;const c=metrics(),mine=myStat();$('#mapSeatsCounter').textContent=`${CAPACITY-c.office} places libres / ${CAPACITY}`;$('#bookingDate').textContent=dayFormatter.format(day);$('#bookingTitle').textContent=mine?.mode==='office'?`Votre bureau : ${mine.seat_id==='EF_PLUS'?'Annexe E/F':mine.seat_id}`:'Choisissez une place';$('#bookingDescription').textContent=mine?.mode==='office'?'Votre place est confirmée pour cette journée. Pour la changer, sélectionnez un bureau libre sur le plan.':'Sélectionnez une place disponible pour enregistrer votre présence au bureau.';$('#releaseSeat').hidden=mine?.mode!=='office';
+ $('#seatQuickList').innerHTML=SEATS.map(seat=>{const owner=seatOwner(seat.id),self=owner?.user_id===me.id;return `<button type="button" data-quick-seat="${seat.id}" class="quick-seat ${owner?(self?'mine':'taken'):'free'}" ${owner&&!self?'disabled':''} title="${escapeHtml(owner?'Occupé par '+(personById(owner.user_id)?.display_name||'un collègue'):'Disponible')}"><b>${escapeHtml(seat.label||seat.id)}</b><span>${owner?(self?'Ma place':'Occupé'):'Libre'}</span></button>`;}).join('');
  const ns='http://www.w3.org/2000/svg',root=$('#planSeats');root.replaceChildren();
  for(const seat of SEATS){const owner=seatOwner(seat.id),self=owner?.user_id===me.id,name=owner?personById(owner.user_id)?.display_name||'Occupé':'Disponible';
  const g=document.createElementNS(ns,'g');g.classList.add('spot');if(owner)g.classList.add(self?'mine':'occupied');g.setAttribute('data-seat',seat.id);g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',`${seat.id==='EF_PLUS'?'Annexe E/F':'Bureau '+seat.id} : ${name}`);
@@ -119,6 +163,6 @@ async function updateStatus(mode,seatId=null){if(!me||busy)return;busy=true;try{
  let result;
  if(!mode){result=await sb.from('work_days').delete().eq('user_id',me.id).eq('work_date',fmtDate(day));}
  else {result=await sb.from('work_days').upsert({user_id:me.id,work_date:fmtDate(day),mode,seat_id:mode==='office'?seatId:null},{onConflict:'user_id,work_date'});}
- if(result.error)throw result.error;await loadWeek(false);toast(mode==='office'?'Bureau réservé !':mode==='remote'?'Télétravail enregistré.':mode==='absent'?'Absence enregistrée.':'Réservation libérée.');
- }catch(err){console.error(err);if(err.code==='23505'){toast('Ce bureau vient d’être réservé. Choisissez une autre place.');await loadWeek(false);}else toast('Enregistrement impossible. Vérifiez votre connexion et vos droits.');}finally{busy=false;}}
+ if(result.error)throw result.error;await loadWeek(false);if(view==='calendar')await loadMonth();toast(mode==='office'?'Bureau réservé !':mode==='remote'?'Télétravail enregistré.':mode==='absent'?'Absence enregistrée.':'Réservation libérée.');
+ }catch(err){console.error(err);if(err.code==='23505'){toast('Ce bureau vient d’être réservé. Choisissez une autre place.');await loadWeek(false);if(view==='calendar')await loadMonth();}else toast('Enregistrement impossible. Vérifiez votre connexion et vos droits.');}finally{busy=false;}}
 boot();
