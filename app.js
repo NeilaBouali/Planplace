@@ -11,11 +11,12 @@ const SEATS = [
   { id: 'F', x: 606, y: 145, w: 102, h: 104 },
   // Un seul poste annexe, non nommé I ou J, accolé au module E/F.
   { id: 'EF_PLUS', label: 'E/F +', x: 496, y: 297, w: 200, h: 66 },
-  // Deux nouveaux postes face à H et G, en miroir (pas de poste I ni J).
-  { id: 'K', x: 769, y: 338, w: 113, h: 65 },
-  { id: 'L', x: 769, y: 412, w: 113, h: 61 },
-  { id: 'H', x: 899, y: 338, w: 113, h: 65 },
-  { id: 'G', x: 899, y: 412, w: 113, h: 61 }
+  // Deux îlots distincts à droite, sur le modèle A/B puis C/D.
+  // Rangée du haut : K, H. Rangée du bas : L, G.
+  { id: 'K', x: 769, y: 157, w: 113, h: 92 },
+  { id: 'H', x: 899, y: 157, w: 113, h: 92 },
+  { id: 'L', x: 769, y: 442, w: 113, h: 92 },
+  { id: 'G', x: 899, y: 442, w: 113, h: 92 }
 ];
 const CAPACITY = SEATS.length;
 const cfg = window.PLANPLACE_CONFIG ?? {};
