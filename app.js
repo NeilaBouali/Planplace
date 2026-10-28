@@ -11,12 +11,13 @@ const SEATS = [
   { id: 'F', x: 606, y: 145, w: 102, h: 104 },
   // Un seul poste annexe, non nommé I ou J, accolé au module E/F.
   { id: 'EF_PLUS', label: 'E/F +', x: 496, y: 297, w: 200, h: 66 },
-  // Deux îlots distincts à droite, sur le modèle A/B puis C/D.
-  // Rangée du haut : K, H. Rangée du bas : L, G.
-  { id: 'K', x: 769, y: 157, w: 113, h: 92 },
-  { id: 'H', x: 899, y: 157, w: 113, h: 92 },
-  { id: 'L', x: 769, y: 442, w: 113, h: 92 },
-  { id: 'G', x: 899, y: 442, w: 113, h: 92 }
+  // Selon le plan Draw.io fourni : îlot H/K tourné à 90° sur la droite,
+  // îlot L/G également tourné, plus bas et rapproché du centre.
+  // Les libellés restent lisibles à l'horizontale pour l'application mobile.
+  { id: 'H', x: 827, y: 240, w: 87, h: 150 },
+  { id: 'K', x: 927, y: 240, w: 87, h: 150 },
+  { id: 'L', x: 610, y: 435, w: 88, h: 144 },
+  { id: 'G', x: 714, y: 435, w: 88, h: 144 }
 ];
 const CAPACITY = SEATS.length;
 const cfg = window.PLANPLACE_CONFIG ?? {};

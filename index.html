@@ -67,17 +67,17 @@
 
         <section id="mapView" class="view">
           <div class="map-layout"><div class="card map-card"><div class="map-header"><div><h2>Plan interactif de l’open space</h2><p>Disposition d'après votre vrai plan · appuyez sur une place pour la réserver</p></div><span id="mapSeatsCounter" class="pill"></span></div>
-              <div class="plan-scroll"><div class="plan-wrap"><svg id="officePlan" viewBox="0 0 1060 640" role="img" aria-labelledby="mapTitle mapDesc" xmlns="http://www.w3.org/2000/svg"><title id="mapTitle">Plan de l’open space</title><desc id="mapDesc">Postes A et B en haut à gauche, C et D en bas à gauche, E et F au centre avec leur annexe, À droite, les postes K et H sont côte à côte en haut, et L et G sont côte à côte en bas, sur deux îlots séparés comme A/B et C/D. Sélectionnez un bureau disponible.</desc>
+              <div class="plan-scroll"><div class="plan-wrap"><svg id="officePlan" viewBox="0 0 1060 640" role="img" aria-labelledby="mapTitle mapDesc" xmlns="http://www.w3.org/2000/svg"><title id="mapTitle">Plan de l’open space</title><desc id="mapDesc">Postes A et B en haut à gauche, C et D en bas à gauche, E et F au centre avec leur annexe, Les postes H et K forment un îlot tourné à 90 degrés, placé sur la droite. Les postes L et G forment un second îlot tourné à 90 degrés, plus bas et plus près du centre, selon le plan fourni. Sélectionnez un bureau disponible.</desc>
                 <rect x="14" y="20" width="1032" height="600" rx="16" fill="#fafbff" stroke="#dfe4f3" stroke-width="3"/>
                 <path d="M48 26H990" stroke="#bcd4e7" stroke-width="13" stroke-dasharray="125 13"/>
                 <path d="M24 82V540 M1040 83V552 M66 618H439 M563 618H1006" stroke="#9bd5e3" stroke-width="7" fill="none"/>
                 <g fill="none" stroke="#e1e4ee" stroke-width="2"><path d="M86 65l120 0 0 30 M391 65l100 0 0 32 M645 65h97v32 M862 65h126v29"/><path d="M211 65c-9 45-20 55-47 57 M492 65c-8 47-18 55-45 59 M743 65c-7 40-21 55-42 58"/></g>
-                <g fill="#f0f1fa" stroke="#cdd2e6" stroke-width="2"><rect x="79" y="276" width="48" height="101" rx="7"/><rect x="930" y="89" width="48" height="48" rx="6"/><rect x="995" y="326" width="30" height="84" rx="6"/></g>
+                <g fill="#f0f1fa" stroke="#cdd2e6" stroke-width="2"><rect x="79" y="276" width="48" height="101" rx="7"/><rect x="930" y="89" width="48" height="48" rx="6"/><rect x="1026" y="468" width="12" height="80" rx="6"/></g>
                 <g font-family="system-ui,sans-serif" fill="#a6adc4" font-size="17"><text x="106" y="326" text-anchor="middle" transform="rotate(-90 106 326)">TABLEAU</text><text x="965" y="110" font-size="11" text-anchor="middle">ÉQUIPEMENT</text><text x="528" y="604" font-size="12" text-anchor="middle" letter-spacing="4">CIRCULATION</text><text x="527" y="54" font-size="12" text-anchor="middle" letter-spacing="3">FENÊTRES</text></g>
                 <!-- Plateaux de travail (dont le module complémentaire collé à E et F) -->
-                <g fill="#eae8fb" stroke="#d7d1f7" stroke-width="2"><rect x="160" y="142" width="242" height="132" rx="13"/><rect x="170" y="426" width="241" height="136" rx="13"/><rect x="477" y="124" width="239" height="162" rx="13"/><rect x="477" y="283" width="239" height="94" rx="10"/><rect x="758" y="142" width="265" height="132" rx="13"/><rect x="758" y="426" width="265" height="136" rx="13"/></g>
-                <g stroke="#d3cef0" stroke-width="2"><path d="M281 144v128 M290 427v133 M596 126v157 M596 285v89 M890 144v128 M890 428v132"/></g>
-                <g fill="#fff" stroke="#bfc2df" stroke-width="2"><rect x="252" y="130" width="50" height="17" rx="4"/><rect x="246" y="562" width="50" height="15" rx="4"/><rect x="578" y="108" width="45" height="16" rx="4"/><rect x="578" y="375" width="45" height="16" rx="4"/><rect x="866" y="129" width="50" height="16" rx="4"/><rect x="866" y="562" width="50" height="16" rx="4"/><rect x="1025" y="330" width="11" height="42" rx="4"/></g>
+                <g fill="#eae8fb" stroke="#d7d1f7" stroke-width="2"><rect x="160" y="142" width="242" height="132" rx="13"/><rect x="170" y="426" width="241" height="136" rx="13"/><rect x="477" y="124" width="239" height="162" rx="13"/><rect x="477" y="283" width="239" height="94" rx="10"/><rect x="819" y="223" width="202" height="184" rx="13"/><rect x="600" y="419" width="211" height="176" rx="13"/></g>
+                <g stroke="#d3cef0" stroke-width="2"><path d="M281 144v128 M290 427v133 M596 126v157 M596 285v89 M922 224v181 M706 421v172"/></g>
+                <g fill="#fff" stroke="#bfc2df" stroke-width="2"><rect x="252" y="130" width="50" height="17" rx="4"/><rect x="246" y="562" width="50" height="15" rx="4"/><rect x="578" y="108" width="45" height="16" rx="4"/><rect x="578" y="375" width="45" height="16" rx="4"/><rect x="892" y="408" width="52" height="15" rx="4"/><rect x="674" y="595" width="52" height="15" rx="4"/><rect x="1025" y="330" width="11" height="42" rx="4"/></g>
                 <g id="planSeats"></g>
               </svg></div></div>
               <div class="map-legend"><span><i class="legend-dot free"></i>Libre</span><span><i class="legend-dot taken"></i>Occupé</span><span><i class="legend-dot mine"></i>Ma place</span></div>
@@ -116,6 +116,6 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./config.js"></script>
-  <script type="module" src="./app.js?v=31"></script>
+  <script type="module" src="./app.js?v=32"></script>
 </body>
 </html>
