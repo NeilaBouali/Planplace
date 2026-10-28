@@ -52,6 +52,59 @@ function launchPlane(){
   clearTimeout(planeFlightTimer);
   planeFlightTimer=setTimeout(()=>el.classList.remove('flying'),2900);
 }
+// Carillon de confirmation : synthèse locale Web Audio, aucun fichier audio externe.
+// Le contexte est déverrouillé pendant le clic pour fonctionner aussi sur mobile.
+const BOOKING_SOUND_PREF = 'seatplace.booking.sound.v1';
+let bookingSoundEnabled = true;
+try { bookingSoundEnabled = localStorage.getItem(BOOKING_SOUND_PREF) !== 'off'; } catch (_) {}
+let bookingAudioContext = null;
+function updateSoundButton(){
+  const button = $('#bookingSoundToggle');
+  if (!button) return;
+  button.textContent = bookingSoundEnabled ? '🔊 Son activé' : '🔇 Son coupé';
+  button.setAttribute('aria-pressed', String(bookingSoundEnabled));
+  button.setAttribute('aria-label', bookingSoundEnabled ? 'Couper le son des réservations' : 'Activer le son des réservations');
+  button.title = bookingSoundEnabled ? 'Couper le carillon de confirmation' : 'Activer le carillon de confirmation';
+}
+function prepareBookingSound(){
+  if (!bookingSoundEnabled) return;
+  try {
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) return;
+    if (!bookingAudioContext) bookingAudioContext = new Context();
+    if (bookingAudioContext.state === 'suspended') bookingAudioContext.resume().catch(() => {});
+    // Un très bref signal silencieux rend le contexte prêt après le geste utilisateur.
+    const silent = bookingAudioContext.createOscillator();
+    const zero = bookingAudioContext.createGain();
+    zero.gain.value = 0;
+    silent.connect(zero);
+    zero.connect(bookingAudioContext.destination);
+    silent.start();
+    silent.stop(bookingAudioContext.currentTime + 0.012);
+  } catch (error) { console.debug('Son non disponible :', error); }
+}
+function playBookingChime(){
+  if (!bookingSoundEnabled || !bookingAudioContext || bookingAudioContext.state !== 'running') return;
+  try {
+    const ctx = bookingAudioContext;
+    const start = ctx.currentTime + 0.012;
+    const notes = [659.25, 783.99, 1046.5]; // mi, sol, do : mini carillon d'embarquement
+    for (const [i, frequency] of notes.entries()) {
+      const when = start + i * 0.125;
+      const osc = ctx.createOscillator();
+      const envelope = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frequency, when);
+      envelope.gain.setValueAtTime(0.0001, when);
+      envelope.gain.exponentialRampToValueAtTime(0.065, when + 0.018);
+      envelope.gain.exponentialRampToValueAtTime(0.0001, when + 0.35);
+      osc.connect(envelope);
+      envelope.connect(ctx.destination);
+      osc.start(when);
+      osc.stop(when + 0.36);
+    }
+  } catch (error) { console.debug('Carillon non disponible :', error); }
+}
 function showError(msg){const el=$('#appError');el.hidden=!msg;el.textContent=msg||'';}
 function statFor(id){return weekRows.find(x=>x.user_id===id && x.work_date===fmtDate(day))||null;}
 function seatOwner(id){return weekRows.find(x=>x.work_date===fmtDate(day)&&x.mode==='office'&&x.seat_id===id) || null;}
@@ -64,6 +117,12 @@ function monthStartEnd(){const start=monday(calendarMonth);return {start:fmtDate
 function monthRowsFor(d){const key=fmtDate(d);return monthRows.filter(r=>r.work_date===key);}
 function weekStartEnd(){const start=monday(day);return {start:fmtDate(start),end:fmtDate(addDays(start,4))};}
 function initUi(){
+ updateSoundButton();
+ $('#bookingSoundToggle').addEventListener('click', () => {
+   bookingSoundEnabled = !bookingSoundEnabled;
+   try { localStorage.setItem(BOOKING_SOUND_PREF, bookingSoundEnabled ? 'on' : 'off'); } catch (_) {}
+   updateSoundButton();
+ });
  $('#togglePassword').addEventListener('click',()=>{const f=$('#password'),show=f.type==='password';f.type=show?'text':'password';$('#togglePassword').textContent=show?'Masquer':'Afficher';});
  $('#loginForm').addEventListener('submit',signIn);
  $('#logoutDesktop').addEventListener('click',logOut);
@@ -173,10 +232,10 @@ function renderMap(){if(!me)return;const c=metrics(),mine=myStat();$('#mapSeatsC
 async function selectSeat(id){if(!me||busy)return;const owner=seatOwner(id),label=id==='EF_PLUS'?'Annexe E/F':id;if(owner && owner.user_id!==me.id){toast(`Ce bureau est déjà réservé par ${personById(owner.user_id)?.display_name||'un collègue'}.`);return;}
  if(owner?.user_id===me.id){toast('Vous avez déjà réservé ce bureau.');return;}
  await updateStatus('office',id);}
-async function updateStatus(mode,seatId=null){if(!me||busy)return;busy=true;try{
+async function updateStatus(mode,seatId=null){if(!me||busy)return; if(mode==='office')prepareBookingSound();busy=true;try{
  let result;
  if(!mode){result=await sb.from('work_days').delete().eq('user_id',me.id).eq('work_date',fmtDate(day));}
  else {result=await sb.from('work_days').upsert({user_id:me.id,work_date:fmtDate(day),mode,seat_id:mode==='office'?seatId:null},{onConflict:'user_id,work_date'});}
- if(result.error)throw result.error;await loadWeek(false);if(view==='calendar')await loadMonth();if(mode==='office')launchPlane();toast(mode==='office'?'Siège réservé ! Bon vol ✈':mode==='remote'?'Télétravail enregistré.':mode==='absent'?'Absence enregistrée.':'Réservation libérée.');
+ if(result.error)throw result.error;if(mode==='office'){launchPlane();playBookingChime();}await loadWeek(false);if(view==='calendar')await loadMonth();toast(mode==='office'?'Siège réservé ! Bon vol ✈':mode==='remote'?'Télétravail enregistré.':mode==='absent'?'Absence enregistrée.':'Réservation libérée.');
  }catch(err){console.error(err);if(err.code==='23505'){toast('Ce bureau vient d’être réservé. Choisissez une autre place.');await loadWeek(false);if(view==='calendar')await loadMonth();}else toast('Enregistrement impossible. Vérifiez votre connexion et vos droits.');}finally{busy=false;}}
 boot();

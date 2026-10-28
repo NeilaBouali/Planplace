@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=4">
+  <link rel="stylesheet" href="./styles.css?v=5">
   <title>SeatPlace · Open space</title>
 </head>
 <body>
@@ -82,7 +82,7 @@
               </svg></div></div>
               <div class="map-legend"><span><i class="legend-dot free"></i>Libre</span><span><i class="legend-dot taken"></i>Occupé</span><span><i class="legend-dot mine"></i>Ma place</span></div>
               <div class="seat-picker"><div class="seat-picker-title">Sélection rapide d’une place <small>Utile sur téléphone</small></div><div id="seatQuickList" class="seat-quick-list" aria-label="Choisir un bureau"></div></div>
-          </div><aside class="card booking-panel"><div class="section-top"><h2>Votre réservation</h2></div><p id="bookingDate" class="muted"></p><div class="booking-illustration"><svg class="seat-preview" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 105" aria-hidden="true"><defs><linearGradient id="cushion" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dedcff"/><stop offset="1" stop-color="#b9dbf6"/></linearGradient></defs><path d="M39 16q-8 1-7 13l8 42q2 8 12 8h26q7 0 8-8l2-34q1-12-10-13Z" fill="url(#cushion)" stroke="#7565c9" stroke-width="2.5"/><path d="M45 26q-4 1-4 7l6 30q1 5 5 5h26" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="4"/><path d="M40 77h52q10 0 10 9v2H55q-13 0-15-11" fill="#eceaff" stroke="#7565c9" stroke-width="2.5"/><path d="M31 62v25m73 0v11m-51-10v11" stroke="#7565c9" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M90 13l17-8-8 16-12 4" fill="#68badd"/></svg></div><h3 id="bookingTitle">Choisissez une place</h3><p id="bookingDescription">Cliquez sur un bureau libre sur le plan.</p><button id="releaseSeat" class="btn btn-danger wide" hidden>Libérer mon bureau</button><div class="panel-note">🔐 Chaque compte réserve uniquement pour lui-même. Vos collègues voient les changements en direct.</div></aside></div>
+          </div><aside class="card booking-panel"><div class="section-top"><h2>Votre réservation</h2><button id="bookingSoundToggle" type="button" class="booking-sound-toggle" aria-pressed="true" aria-label="Couper le son des réservations" title="Couper le carillon de confirmation">🔊 Son activé</button></div><p id="bookingDate" class="muted"></p><div class="booking-illustration"><svg class="seat-preview" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 105" aria-hidden="true"><defs><linearGradient id="cushion" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dedcff"/><stop offset="1" stop-color="#b9dbf6"/></linearGradient></defs><path d="M39 16q-8 1-7 13l8 42q2 8 12 8h26q7 0 8-8l2-34q1-12-10-13Z" fill="url(#cushion)" stroke="#7565c9" stroke-width="2.5"/><path d="M45 26q-4 1-4 7l6 30q1 5 5 5h26" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="4"/><path d="M40 77h52q10 0 10 9v2H55q-13 0-15-11" fill="#eceaff" stroke="#7565c9" stroke-width="2.5"/><path d="M31 62v25m73 0v11m-51-10v11" stroke="#7565c9" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M90 13l17-8-8 16-12 4" fill="#68badd"/></svg></div><h3 id="bookingTitle">Choisissez une place</h3><p id="bookingDescription">Cliquez sur un bureau libre sur le plan.</p><button id="releaseSeat" class="btn btn-danger wide" hidden>Libérer mon bureau</button><div class="panel-note">🔐 Chaque compte réserve uniquement pour lui-même. Vos collègues voient les changements en direct.</div></aside></div>
         </section>
 
         <section id="calendarView" class="view">
@@ -117,6 +117,6 @@
   <div id="flightOverlay" class="flight-overlay" aria-hidden="true"><div class="flight-trail"></div><svg class="flight-plane" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><defs><linearGradient id="planeBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a4e7ff"/><stop offset="1" stop-color="#6354d8"/></linearGradient></defs><path fill="url(#planeBody)" stroke="#fff" stroke-width="2" stroke-linejoin="round" d="M110 13c4-3 7 0 4 4L78 53 93 86l-7 8-36-28-22 20 2-19-18-18 18 3 21-22 28-37 8-7-8 40Z"/><path d="M33 72l-13 10" stroke="#b7edff" stroke-width="4" stroke-linecap="round"/></svg><div class="flight-clouds">✦ &nbsp; ✦ &nbsp; ✦</div></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./config.js"></script>
-  <script type="module" src="./app.js?v=4"></script>
+  <script type="module" src="./app.js?v=5"></script>
 </body>
 </html>

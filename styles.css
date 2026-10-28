@@ -146,3 +146,10 @@ body{background:radial-gradient(circle at 85% 0%,rgba(120,187,227,.095),transpar
 @keyframes seatFlightTrail{0%{opacity:0;left:-80%}12%{opacity:.85}90%{opacity:.28}100%{opacity:0;left:125%}}
 @media(max-width:740px){.plan-scroll{padding:12px 7px}.plan-wrap{min-width:0!important}.hero-seat-art{right:4%;top:12%;opacity:.22}.hero-seat-art img{width:65px;height:65px}.hero-seat-art span{display:none}.flight-plane{width:98px}.brand-icon{box-shadow:0 5px 14px rgba(78,89,173,.14)}}
 @media(prefers-reduced-motion:reduce){.flight-overlay{display:none}.btn{transition:none}}
+
+/* SeatPlace 4.1 : interrupteur accessible du carillon de réservation. */
+.booking-sound-toggle{display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;padding:7px 10px;border:1px solid #d8daf4;border-radius:999px;background:#f0efff;color:#564cbe;font:700 11px/1.2 system-ui,sans-serif;cursor:pointer;transition:background-color .15s ease}
+.booking-sound-toggle:hover{background:#e5e2ff}
+.booking-sound-toggle:focus-visible{outline:3px solid #7b72e2;outline-offset:2px}
+.booking-sound-toggle[aria-pressed="false"]{color:#69748b;background:#f5f6fb;border-color:#e2e6f0}
+@media(max-width:430px){.booking-panel .section-top{gap:8px;align-items:flex-start}.booking-sound-toggle{font-size:10px;padding:6px 8px}}
