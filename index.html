@@ -30,8 +30,25 @@
         <div class="password-wrap"><input id="password" type="password" required autocomplete="current-password" placeholder="Votre mot de passe"><button id="togglePassword" aria-label="Afficher ou masquer le mot de passe" type="button">Afficher</button></div>
         <p id="loginError" class="error-message" role="alert" aria-live="polite"></p>
         <button id="loginButton" class="btn btn-primary wide" type="submit">Se connecter <span aria-hidden="true">→</span></button>
+        <button id="openSignup" class="btn btn-link signup-link" type="button">Première visite ? Créer mon compte</button>
       </form>
-      <p class="login-foot">Accès réservé aux collaborateurs autorisés.<br>Contactez votre administrateur pour créer un compte.</p>
+      <form id="signupForm" class="login-form" hidden>
+        <h2 class="signup-heading">Créer mon compte ✈️</h2>
+        <p class="signup-explainer">Renseignez vos coordonnées. Après confirmation de votre e-mail, l'administrateur pourra autoriser votre accès.</p>
+        <label for="signupName">Nom et prénom</label>
+        <input id="signupName" type="text" required minlength="2" maxlength="70" autocomplete="name" placeholder="Prénom Nom">
+        <label for="signupEmail">Adresse e-mail professionnelle</label>
+        <input id="signupEmail" type="email" required maxlength="254" autocomplete="email" placeholder="prenom@entreprise.fr" autocapitalize="none" spellcheck="false">
+        <label for="signupPassword">Créer un mot de passe</label>
+        <input id="signupPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="8 caractères minimum">
+        <label for="signupPasswordConfirm">Confirmer le mot de passe</label>
+        <input id="signupPasswordConfirm" type="password" required minlength="8" autocomplete="new-password" placeholder="Ressaisir le mot de passe">
+        <p id="signupError" class="error-message" role="alert" aria-live="polite"></p>
+        <button id="signupButton" class="btn btn-primary wide" type="submit">Créer mon compte <span aria-hidden="true">→</span></button>
+        <button id="backToLogin" class="btn btn-link signup-link" type="button">J'ai déjà un compte · Me connecter</button>
+      </form>
+      <div id="signupFeedback" class="notice signup-feedback" role="status" aria-live="polite" hidden></div>
+      <p class="login-foot">Accès réservé aux collaborateurs autorisés.<br>Les nouveaux comptes nécessitent une confirmation e-mail et l'approbation de l'administrateur.</p>
     </div>
   </main>
 
@@ -66,7 +83,7 @@
             <div class="push-icon" aria-hidden="true">🔔</div>
             <div class="push-copy">
               <h3>Rappels mobiles · Préparez votre journée</h3>
-              <p>Recevez une notification à 9 h, la veille d’un jour ouvré, si vous n’avez pas indiqué votre statut (bureau, télétravail ou absence).</p>
+              <p>Recevez une notification à 20 h, la veille d’un jour ouvré, si vous n’avez pas indiqué votre statut (bureau, télétravail ou absence).</p>
               <span id="pushHelp" role="status" aria-live="polite">Les notifications sont facultatives et peuvent être désactivées à tout moment.</span>
             </div>
             <button type="button" class="btn btn-primary push-toggle" id="pushToggle">Activer les notifications</button>
@@ -127,6 +144,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./config.js"></script>
   <script src="./push-config.js"></script>
-  <script type="module" src="./app.js?v=42"></script>
+  <script type="module" src="./app.js?v=43"></script>
 </body>
 </html>

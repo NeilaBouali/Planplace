@@ -193,6 +193,9 @@ function initUi(){
  });
  $('#togglePassword').addEventListener('click',()=>{const f=$('#password'),show=f.type==='password';f.type=show?'text':'password';$('#togglePassword').textContent=show?'Masquer':'Afficher';});
  $('#loginForm').addEventListener('submit',signIn);
+ $('#signupForm').addEventListener('submit',signUp);
+ $('#openSignup').addEventListener('click',()=>showAuthForm('signup'));
+ $('#backToLogin').addEventListener('click',()=>showAuthForm('login'));
  $('#logoutDesktop').addEventListener('click',logOut);
  $('#logoutMobile').addEventListener('click',logOut);
  $('#pendingLogout').addEventListener('click',logOut);
@@ -221,7 +224,7 @@ function initUi(){
 }
 async function boot(){initUi();
  if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
- if(!cfgOk){showScreen('loginScreen');$('#setupNotice').hidden=false;$('#loginForm').hidden=true;return;}
+ if(!cfgOk){showScreen('loginScreen');$('#setupNotice').hidden=false;$('#loginForm').hidden=true;$('#openSignup').hidden=true;return;}
  try{
    const sdk=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
    sb=sdk.createClient(cfg.supabaseUrl.replace(/\/$/,''),cfg.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
@@ -229,6 +232,42 @@ async function boot(){initUi();
    if(error || !user){showScreen('loginScreen');return;}
    await enterApp(user);
  } catch(err){showScreen('loginScreen');$('#loginError').textContent='Connexion au service impossible. Vérifiez votre connexion Internet et config.js.';console.error('SeatPlace initialization failed:',err);}
+}
+function showAuthForm(mode){
+ const creating=mode==='signup';
+ $('#loginForm').hidden=creating;
+ $('#signupForm').hidden=!creating;
+ $('#signupFeedback').hidden=true;
+ $('#loginError').textContent='';
+ $('#signupError').textContent='';
+ $('.login-intro h1').textContent=creating?'Bienvenue à bord ✈️':'Bienvenue à bord 👋';
+ $('.login-intro p').textContent=creating?'Créez votre compte en quelques instants, puis confirmez votre adresse e-mail.':'Connectez-vous pour consulter les présences et réserver une place au bureau.';
+ (creating?$('#signupName'):$('#email')).focus();
+}
+async function signUp(e){
+ e.preventDefault();if(!sb)return;
+ const full_name=$('#signupName').value.trim().replace(/\s+/g,' '),
+   email=$('#signupEmail').value.trim(),password=$('#signupPassword').value,
+   confirm=$('#signupPasswordConfirm').value;
+ $('#signupError').textContent='';
+ if(full_name.length<2){$('#signupError').textContent='Indiquez votre nom et votre prénom.';return;}
+ if(password.length<8){$('#signupError').textContent='Votre mot de passe doit contenir au moins 8 caractères.';return;}
+ if(password!==confirm){$('#signupError').textContent='Les mots de passe ne correspondent pas.';return;}
+ const button=$('#signupButton');button.disabled=true;button.textContent='Création du compte…';
+ try {
+   const redirect = new URL('./',window.location.href).href;
+   const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:redirect,data:{full_name}}});
+   if(error)throw error;
+   // Si la confirmation e-mail est désactivée par erreur, ne pas conserver une session ouverte.
+   if(data?.session)await sb.auth.signOut();
+   $('#signupPassword').value='';$('#signupPasswordConfirm').value='';
+   showAuthForm('login');$('#email').value=email;
+   const box=$('#signupFeedback');box.hidden=false;
+   box.textContent='Demande reçue ! Consultez votre boîte e-mail pour confirmer votre adresse. Une fois celle-ci confirmée et votre compte approuvé par l’administrateur, vous pourrez vous connecter.';
+ } catch(err) {
+   console.warn('Inscription refusée:',err);
+   $('#signupError').textContent=err?.message?.toLowerCase().includes('signup')?'Les inscriptions ne sont pas encore activées. Contactez l’administrateur.':'Création impossible. Vérifiez vos informations ou réessayez plus tard.';
+ } finally{button.disabled=false;button.innerHTML='Créer mon compte <span aria-hidden="true">→</span>';}
 }
 async function signIn(e){e.preventDefault();if(!sb)return;const email=$('#email').value.trim(),password=$('#password').value;
  $('#loginError').textContent='';$('#loginButton').disabled=true;$('#loginButton').textContent='Connexion…';
