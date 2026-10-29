@@ -163,12 +163,3 @@ body{background:radial-gradient(circle at 85% 0%,rgba(120,187,227,.095),transpar
 .push-copy span{font-size:11px;color:#6556d8}
 .push-toggle{flex:0 0 auto;max-width:220px;white-space:normal}
 @media(max-width:740px){.push-card{align-items:flex-start;flex-wrap:wrap;padding:17px;gap:12px}.push-icon{width:42px;height:42px;flex-basis:42px}.push-copy{flex:1 1 calc(100% - 65px)}.push-toggle{width:100%;max-width:none}}
-
-/* SeatPlace 4.3 — inscription autonome avec validation administrateur. */
-.signup-link{width:100%;min-height:34px;text-align:center;justify-content:center;font-size:12px;color:var(--purple);margin-top:4px}
-.signup-link:hover{text-decoration:underline}
-.signup-heading{font-size:20px;margin:4px 0 0;color:var(--ink);letter-spacing:-.5px}
-.signup-explainer{font-size:12px;color:var(--muted);line-height:1.65;margin:0 0 4px}
-.signup-feedback{color:#14694d;background:#edfff5;border-color:#bce8cf;margin:14px 0 0;line-height:1.65}
-#signupForm input{min-height:46px}
-@media(max-width:520px){.signup-heading{font-size:19px}.signup-explainer{font-size:11px}}
