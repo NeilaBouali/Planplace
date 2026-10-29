@@ -17,11 +17,14 @@ const SEATS = [
   { id: 'L', x: 610, y: 435, w: 88, h: 144 },
   { id: 'G', x: 714, y: 435, w: 88, h: 144 }
 ];
+const queryReminder = new URLSearchParams(location.search).get('rappel');
+const hasValidReminder = /^\d{4}-\d{2}-\d{2}$/.test(queryReminder || '');
 const CAPACITY = SEATS.length;
 const cfg = window.PLANPLACE_CONFIG ?? {};
 const cfgOk = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test((cfg.supabaseUrl || '').trim()) &&
   typeof cfg.supabaseKey === 'string' && cfg.supabaseKey.length > 20 && !cfg.supabaseKey.includes('VOTRE_');
 let sb = null, me = null, team = [], weekRows = [], monthRows = [], day = todayOrMonday(), view = 'home', busy = false;
+if(hasValidReminder) day=parseLocal(queryReminder);
 let calendarMonth = new Date(day.getFullYear(), day.getMonth(), 1, 12), monthRequest = 0;
 let currentRequest = 0, toastTimer, realtimeChannel = null;
 const dayFormatter = new Intl.DateTimeFormat('fr-FR', {weekday:'long',day:'numeric',month:'long'});
@@ -105,6 +108,70 @@ function playBookingChime(){
     }
   } catch (error) { console.debug('Carillon non disponible :', error); }
 }
+// Notifications Web Push, opt-in individuel, sans clé privée côté navigateur.
+const PUSH_KEY = window.SEATPLACE_PUSH_PUBLIC_KEY || '';
+let pushBusy = false;
+function b64ToBytes(str) {
+ const padded = (str + '='.repeat((4 - str.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+ const raw = atob(padded);
+ return Uint8Array.from(raw, char => char.charCodeAt(0));
+}
+function pushSupported() {return !!(window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && PUSH_KEY);}
+async function getPushRegistration() {
+ // Register the same worker as the existing PWA to avoid conflicting scopes.
+ await navigator.serviceWorker.register('./sw.js');
+ return navigator.serviceWorker.ready;
+}
+async function refreshPushUi() {
+ const btn=$('#pushToggle'), text=$('#pushHelp');
+ if (!btn || !text || !me) return;
+ if (!pushSupported()) {
+   btn.disabled=true;
+   text.textContent = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches
+       ? 'Sur iPhone : installez SeatPlace sur l’écran d’accueil puis ouvrez-le depuis son icône.'
+       : 'Les notifications ne sont pas disponibles sur ce navigateur ou cette installation.';
+   return;
+ }
+ btn.disabled=pushBusy;
+ if (Notification.permission === 'denied') {
+   btn.disabled=true;
+   text.textContent='Notifications bloquées : autorisez-les dans les réglages du téléphone.';
+   return;
+ }
+ try {
+   const reg=await getPushRegistration();
+   const sub=await reg.pushManager.getSubscription();
+   btn.textContent=sub ? 'Désactiver les rappels' : 'Activer les notifications';
+   text.textContent=sub ? 'Rappels activés sur cet appareil. Vous pouvez vous désinscrire à tout moment.' : 'Les rappels sont désactivés sur cet appareil.';
+ } catch (err) {console.warn('État notifications',err);text.textContent='Impossible de vérifier les notifications.';}
+}
+async function togglePush() {
+ if(!me || !sb || pushBusy || !pushSupported())return;
+ const btn=$('#pushToggle'), text=$('#pushHelp');
+ pushBusy=true;btn.disabled=true;text.textContent='Configuration des notifications…';
+ // Appeler requestPermission directement depuis l'événement tactile/clic (indispensable sur iOS).
+ const permissionPromise = Notification.permission==='default' ? Notification.requestPermission() : Promise.resolve(Notification.permission);
+ try{
+   const regPromise=getPushRegistration();
+   const reg=await regPromise;
+   let sub=await reg.pushManager.getSubscription();
+   if(sub) {
+     const {error}=await sb.from('push_subscriptions').delete().eq('endpoint',sub.endpoint).eq('user_id',me.id);
+     if(error) throw error;
+     await sub.unsubscribe();
+     toast('Notifications désactivées sur cet appareil.');
+   } else {
+     if ((await permissionPromise)!=='granted') {toast('Notifications non autorisées.');return;}
+     sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(PUSH_KEY)});
+     const keys=sub.toJSON().keys;
+     if(!keys?.p256dh || !keys?.auth) throw new Error('Clés du navigateur indisponibles');
+     const {error}=await sb.from('push_subscriptions').upsert({endpoint:sub.endpoint,user_id:me.id,p256dh:keys.p256dh,auth:keys.auth},{onConflict:'endpoint'});
+     if(error)throw error;
+     toast('Rappels mobiles activés ! 🔔');
+   }
+ }catch(err){console.error('Inscription push',err);toast('Activation impossible. Vérifiez la configuration Supabase.');}
+ finally{pushBusy=false;await refreshPushUi();}
+}
 function showError(msg){const el=$('#appError');el.hidden=!msg;el.textContent=msg||'';}
 function statFor(id){return weekRows.find(x=>x.user_id===id && x.work_date===fmtDate(day))||null;}
 function seatOwner(id){return weekRows.find(x=>x.work_date===fmtDate(day)&&x.mode==='office'&&x.seat_id===id) || null;}
@@ -118,6 +185,7 @@ function monthRowsFor(d){const key=fmtDate(d);return monthRows.filter(r=>r.work_
 function weekStartEnd(){const start=monday(day);return {start:fmtDate(start),end:fmtDate(addDays(start,4))};}
 function initUi(){
  updateSoundButton();
+ $('#pushToggle').addEventListener('click',togglePush);
  $('#bookingSoundToggle').addEventListener('click', () => {
    bookingSoundEnabled = !bookingSoundEnabled;
    try { localStorage.setItem(BOOKING_SOUND_PREF, bookingSoundEnabled ? 'on' : 'off'); } catch (_) {}
@@ -151,7 +219,9 @@ function initUi(){
  $('#officePlan').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const target=e.target.closest('[data-seat]');if(target){e.preventDefault();selectSeat(target.dataset.seat);}}});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden && me){loadWeek(false);if(view==='calendar')loadMonth(false);}});
 }
-async function boot(){initUi();if(!cfgOk){showScreen('loginScreen');$('#setupNotice').hidden=false;$('#loginForm').hidden=true;return;}
+async function boot(){initUi();
+ if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ if(!cfgOk){showScreen('loginScreen');$('#setupNotice').hidden=false;$('#loginForm').hidden=true;return;}
  try{
    const sdk=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
    sb=sdk.createClient(cfg.supabaseUrl.replace(/\/$/,''),cfg.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
@@ -159,7 +229,6 @@ async function boot(){initUi();if(!cfgOk){showScreen('loginScreen');$('#setupNot
    if(error || !user){showScreen('loginScreen');return;}
    await enterApp(user);
  } catch(err){showScreen('loginScreen');$('#loginError').textContent='Connexion au service impossible. Vérifiez votre connexion Internet et config.js.';console.error('SeatPlace initialization failed:',err);}
- if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 async function signIn(e){e.preventDefault();if(!sb)return;const email=$('#email').value.trim(),password=$('#password').value;
  $('#loginError').textContent='';$('#loginButton').disabled=true;$('#loginButton').textContent='Connexion…';
@@ -174,7 +243,8 @@ async function enterApp(user){
  team=data;
  $('#userName').textContent=personById(me.id)?.display_name||me.email;
  $('#userInitials').textContent=initials(personById(me.id)?.display_name||me.email);
- showScreen('appScreen');goto('home');await loadWeek();
+ showScreen('appScreen');goto(hasValidReminder?'calendar':'home');await loadWeek();
+ refreshPushUi().catch(err=>console.warn('Notifications :',err));
  if(realtimeChannel)await sb.removeChannel(realtimeChannel);
  realtimeChannel=sb.channel('planplace-days').on('postgres_changes',{event:'*',schema:'public',table:'work_days'},(payload)=>{if((payload.eventType==='INSERT'||payload.eventType==='UPDATE')&&payload.new?.mode==='office')launchPlane();loadWeek(false);if(view==='calendar')loadMonth(false);}).subscribe();
 }

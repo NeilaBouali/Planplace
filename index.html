@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=5">
+  <link rel="stylesheet" href="./styles.css?v=42">
   <title>SeatPlace · Open space</title>
 </head>
 <body>
@@ -62,6 +62,15 @@
         <section id="homeView" class="view active">
           <div class="hero"><div class="hero-kicker">✦ MON PLANNING HYBRIDE</div><h2>Prêt pour votre prochaine escale ?</h2><p>Réservez votre siège au bureau ou indiquez votre journée de télétravail.</p><div class="hero-actions"><button class="btn btn-white" data-go="map">Choisir une place →</button><button class="btn btn-translucent" id="heroRemote">Je suis en télétravail</button></div><div class="hero-orbit"></div><div class="hero-seat-art" aria-hidden="true"><img src="./seatmark.svg" alt=""><span>SEAT EXPERIENCE</span></div></div>
           <div id="metrics" class="metrics"></div>
+          <div class="card push-card" id="pushReminderCard">
+            <div class="push-icon" aria-hidden="true">🔔</div>
+            <div class="push-copy">
+              <h3>Rappels mobiles · Préparez votre journée</h3>
+              <p>Recevez une notification à 9 h, la veille d’un jour ouvré, si vous n’avez pas indiqué votre statut (bureau, télétravail ou absence).</p>
+              <span id="pushHelp" role="status" aria-live="polite">Les notifications sont facultatives et peuvent être désactivées à tout moment.</span>
+            </div>
+            <button type="button" class="btn btn-primary push-toggle" id="pushToggle">Activer les notifications</button>
+          </div>
           <div class="two-col"><div class="card section-card"><div class="section-top"><h2>Mon statut du jour</h2><span id="todayDateText" class="muted"></span></div><div id="myStatusBox" class="my-status"></div><div class="status-actions"><button class="btn btn-outline" data-go="map">⌑ Au bureau</button><button class="btn btn-outline" id="statusRemote">⌂ Télétravail</button><button class="btn btn-outline" id="statusAbsent">☷ Absence</button></div></div><div class="card section-card"><div class="section-top"><h2>Votre équipe aujourd'hui</h2><button data-go="team" class="text-button">Voir tous →</button></div><div id="teamPreview" class="team-preview"></div></div></div>
         </section>
 
@@ -117,6 +126,7 @@
   <div id="flightOverlay" class="flight-overlay" aria-hidden="true"><div class="flight-trail"></div><svg class="flight-plane" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><defs><linearGradient id="planeBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a4e7ff"/><stop offset="1" stop-color="#6354d8"/></linearGradient></defs><path fill="url(#planeBody)" stroke="#fff" stroke-width="2" stroke-linejoin="round" d="M110 13c4-3 7 0 4 4L78 53 93 86l-7 8-36-28-22 20 2-19-18-18 18 3 21-22 28-37 8-7-8 40Z"/><path d="M33 72l-13 10" stroke="#b7edff" stroke-width="4" stroke-linecap="round"/></svg><div class="flight-clouds">✦ &nbsp; ✦ &nbsp; ✦</div></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./config.js"></script>
-  <script type="module" src="./app.js?v=5"></script>
+  <script src="./push-config.js"></script>
+  <script type="module" src="./app.js?v=42"></script>
 </body>
 </html>

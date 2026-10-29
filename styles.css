@@ -153,3 +153,13 @@ body{background:radial-gradient(circle at 85% 0%,rgba(120,187,227,.095),transpar
 .booking-sound-toggle:focus-visible{outline:3px solid #7b72e2;outline-offset:2px}
 .booking-sound-toggle[aria-pressed="false"]{color:#69748b;background:#f5f6fb;border-color:#e2e6f0}
 @media(max-width:430px){.booking-panel .section-top{gap:8px;align-items:flex-start}.booking-sound-toggle{font-size:10px;padding:6px 8px}}
+
+/* SeatPlace 4.2 : carte d'inscription aux rappels push. */
+.push-card{display:flex;gap:16px;align-items:center;margin:16px 0 23px;padding:18px 22px;background:linear-gradient(110deg,#fff,#f6f5ff);min-width:0}
+.push-icon{display:grid;place-items:center;width:49px;height:49px;flex:0 0 49px;background:#ebe8ff;border-radius:14px;font-size:25px}
+.push-copy{min-width:0;flex:1}
+.push-copy h3{margin:0 0 5px;font-size:14px;color:#2b2852}
+.push-copy p{font-size:11px;color:var(--muted);line-height:1.6;margin:0 0 5px}
+.push-copy span{font-size:11px;color:#6556d8}
+.push-toggle{flex:0 0 auto;max-width:220px;white-space:normal}
+@media(max-width:740px){.push-card{align-items:flex-start;flex-wrap:wrap;padding:17px;gap:12px}.push-icon{width:42px;height:42px;flex-basis:42px}.push-copy{flex:1 1 calc(100% - 65px)}.push-toggle{width:100%;max-width:none}}
